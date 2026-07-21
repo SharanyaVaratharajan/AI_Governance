@@ -1,0 +1,159 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h1 class="title">Recent Runs</h1>
+<p class="subtitle">Risk distribution and governance activity</p>
+
+<!-- Risk Level Distribution Chart -->
+<div class="box">
+<h2 class="title is-5">Risk Level Distribution</h2>
+<canvas id="riskLevelChart"></canvas>
+</div>
+
+<!-- Risk Score Trend Chart -->
+<div class="box">
+<h2 class="title is-5">Risk Score Trend</h2>
+<canvas id="riskScoreChart"></canvas>
+</div>
+
+<!-- Risk Heatmap -->
+<div class="box">
+<h2 class="title is-5">Risk Heatmap</h2>
+<canvas id="riskHeatmap"></canvas>
+</div>
+
+<!-- Runs Table -->
+<table class="table is-striped is-fullwidth">
+<thead>
+<tr>
+<th>Request ID</th>
+<th>System</th>
+<th>Risk Score</th>
+<th>Risk Level</th>
+<th>Review?</th>
+</tr>
+</thead>
+<tbody>
+{% for r in runs %}
+<tr>
+<td>{{ r.request_id }}</td>
+<td>{{ r.system_name }}</td>
+<td>{{ r.risk_score }}</td>
+<td>{{ r.risk_level }}</td>
+<td>{{ r.requires_review }}</td>
+</tr>
+{% endfor %}
+</tbody>
+</table>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+// Correct JSON parsing for Jinja2
+const runs = {{ runs | tojson }};
+
+// -----------------------------
+// Risk Level Distribution Chart
+//------------------------------
+const riskLevels = runs.map(r => r.risk_level);
+const levelCounts = {
+low: riskLevels.filter(l => l === "low").length,
+medium: riskLevels.filter(l => l === "medium").length,
+high: riskLevels.filter(l => l === "high").length,
+critical: riskLevels.filter(l => l === "critical").length
+};
+
+new Chart(document.getElementById("riskLevelChart"), {
+type: "bar",
+data: {
+labels: ["Low", "Medium", "High", "Critical"],
+datasets: [{
+label: "Risk Level Count",
+data: [
+levelCounts.low,
+levelCounts.medium,
+levelCounts.high,
+levelCounts.critical
+],
+backgroundColor: ["#48c774", "#ffdd57", "#f14668", "#b71c1c"]
+}]
+},
+options: {
+responsive: true,
+plugins: { legend: { position: "bottom" } }
+}
+});
+
+// -----------------------------
+// Risk Score Trend Chart
+//------------------------------
+const riskScores = runs.map(r => r.risk_score);
+const timestamps = runs.map(r => r.created_at);
+
+new Chart(document.getElementById("riskScoreChart"), {
+type: "line",
+data: {
+labels: timestamps,
+datasets: [{
+label: "Risk Score",
+data: riskScores,
+borderColor: "#3273dc",
+fill: false,
+tension: 0.2
+}]
+},
+options: {
+responsive: true,
+plugins: { legend: { position: "bottom" } },
+scales: {
+x: { title: { display: true, text: "Timestamp" } },
+y: { title: { display: true, text: "Risk Score" }, min: 0, max: 1 }
+}
+}
+});
+
+// -----------------------------
+// Risk Heatmap (Scatter Plot)
+//------------------------------
+const heatmapData = {
+datasets: [{
+label: "Risk Score Heatmap",
+data: runs.map(r => ({
+x: r.risk_level,
+y: r.risk_score
+})),
+backgroundColor: function(context) {
+const value = context.raw.y;
+if (value < 0.3) return "#48c774"; // green
+if (value < 0.6) return "#ffdd57"; // yellow
+if (value < 0.8) return "#f14668"; // red
+return "#b71c1c"; // dark red
+},
+pointRadius: 8
+}]
+};
+
+new Chart(document.getElementById("riskHeatmap"), {
+type: "scatter",
+data: heatmapData,
+options: {
+responsive: true,
+scales: {
+x: {
+type: "category",
+labels: ["low", "medium", "high", "critical"],
+title: { display: true, text: "Risk Level" }
+},
+y: {
+min: 0,
+max: 1,
+title: { display: true, text: "Risk Score" }
+}
+}
+}
+});
+
+</script>
+
+{% endblock %}

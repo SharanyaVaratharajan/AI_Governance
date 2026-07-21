@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h1 class="title">AI Systems Overview</h1>
+<p class="subtitle">Governed systems registered in the AI Governance Control Tower</p>
+
+<table class="table is-fullwidth is-hoverable">
+<thead>
+<tr>
+<th>Name</th>
+<th>Owner</th>
+<th>Risk Policy</th>
+<th>Status</th>
+<th>Last Run</th>
+<th>Details</th>
+</tr>
+</thead>
+
+<tbody>
+{% for s in systems %}
+<tr>
+<td><strong>{{ s.name }}</strong></td>
+<td>{{ s.owner }}</td>
+
+<td>
+{% if s.risk_policy == "high" %}
+<span class="tag is-danger">High</span>
+{% elif s.risk_policy == "medium" %}
+<span class="tag is-warning">Medium</span>
+{% else %}
+<span class="tag is-success">Low</span>
+{% endif %}
+</td>
+
+<td>
+{% if s.active %}
+<span class="tag is-success">Active</span>
+{% else %}
+<span class="tag is-light">Inactive</span>
+{% endif %}
+</td>
+
+<td>
+{% if s.last_run_at %}
+{{ s.last_run_at }}
+{% else %}
+<span class="tag is-light">No runs yet</span>
+{% endif %}
+</td>
+
+<td>
+<a class="button is-small is-link"
+   href="/dashboard/systems/{{ s.id }}">View</a>
+</td>
+</tr>
+{% endfor %}
+</tbody>
+</table>
+
+{% endblock %}

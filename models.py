@@ -76,3 +76,14 @@ class AuditEvent(Base):
     actor = Column(String(255))
     event_metadata = Column(JSON)
     created_at = Column(DateTime, default=datetime.utcnow)
+
+
+class TableMetadata(Base):
+    __tablename__ = "table_metadata"
+
+    id = Column(Integer, primary_key=True)
+    table_name = Column(String(255), nullable=False)
+    column_name = Column(String(255), nullable=False)
+    column_type = Column(String(64), nullable=False)
+    tags = Column(Text, nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow)

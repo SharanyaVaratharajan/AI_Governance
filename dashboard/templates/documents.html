@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="section">
+  <div class="container">
+
+    <h1 class="title">Project Documents</h1>
+
+    <div class="content">
+      <p>This page displays key governance documents used by the AI Governance Tower.</p>
+      <p>
+        <a class="button is-link is-light"
+           href="https://github.com/SharanyaVaratharajan/AI_Governance"
+           target="_blank"
+           rel="noopener noreferrer">View on GitHub</a>
+      </p>
+    </div>
+
+    <div class="box">
+      <h2 class="subtitle">judge.md</h2>
+      <pre style="white-space: pre-wrap;">{{ judge_md }}</pre>
+    </div>
+
+    <div class="box">
+      <h2 class="subtitle">README.md</h2>
+      <pre style="white-space: pre-wrap;">{{ readme_md }}</pre>
+    </div>
+
+  </div>
+</section>
+{% endblock %}

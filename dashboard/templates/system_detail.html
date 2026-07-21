@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h1 class="title">{{ system.name }}</h1>
+<p class="subtitle">Owned by {{ system.owner }}</p>
+
+<div class="box">
+<h2 class="title is-5">System Summary</h2>
+
+<p><strong>Risk Policy:</strong> {{ system.risk_policy }}</p>
+<p><strong>Status:</strong> {{ "Active" if system.active else "Inactive" }}</p>
+<p><strong>Last Run:</strong> {{ system.last_run_at or "No runs yet" }}</p>
+</div>
+
+<h2 class="title is-5">Recent Runs</h2>
+<table class="table is-fullwidth is-striped">
+<thead>
+<tr>
+<th>Request ID</th>
+<th>Risk Score</th>
+<th>Risk Level</th>
+<th>Review?</th>
+</tr>
+</thead>
+<tbody>
+{% for r in runs %}
+<tr>
+<td>{{ r.request_id }}</td>
+<td>{{ r.risk_score }}</td>
+<td>{{ r.risk_level }}</td>
+<td>{{ r.requires_review }}</td>
+</tr>
+{% endfor %}
+</tbody>
+</table>
+
+<h2 class="title is-5">Recent Incidents</h2>
+<table class="table is-fullwidth is-striped">
+<thead>
+<tr>
+<th>ID</th>
+<th>Severity</th>
+<th>Description</th>
+<th>Created</th>
+</tr>
+</thead>
+<tbody>
+{% for i in incidents %}
+<tr>
+<td>{{ i.id }}</td>
+<td>{{ i.severity }}</td>
+<td>{{ i.description }}</td>
+<td>{{ i.created_at }}</td>
+<td>
+<a class="button is-small is-danger" href="/incidents/{{ i.id }}">
+View
+</a>
+</td>
+</tr>
+{% endfor %}
+</tbody>
+</table>
+
+{% endblock %}

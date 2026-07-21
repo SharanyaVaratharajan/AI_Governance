@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>AI Governance Dashboard</title>
+
+    <!-- Mermaid.js -->
+    <script src="https://unpkg.com/mermaid@10/dist/mermaid.min.js"></script>
+    <script>
+      mermaid.initialize({ startOnLoad: true });
+    </script>
+
+    <!-- Bulma CSS -->
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+</head>
+
+<body>
+<nav class="navbar is-dark">
+  <div class="navbar-menu">
+    <div class="navbar-start">
+
+      <a class="navbar-item {% if active_page=='systems' %}is-active{% endif %}"
+         href="/dashboard/systems">Systems</a>
+
+      <a class="navbar-item {% if active_page=='runs' %}is-active{% endif %}"
+         href="/dashboard/runs">Runs</a>
+
+      <a class="navbar-item {% if active_page=='incidents' %}is-active{% endif %}"
+         href="/dashboard/incidents">Incidents</a>
+
+      <a class="navbar-item {% if active_page=='metadata' %}is-active{% endif %}"
+         href="/dashboard/metadata">Metadata</a>
+
+      <a class="navbar-item {% if active_page=='documents' %}is-active{% endif %}"
+         href="/dashboard/documents">Documents</a>
+
+      <a class="navbar-item {% if active_page=='diagrams' %}is-active{% endif %}"
+         href="/dashboard/diagrams">Diagrams</a>
+
+    </div>
+  </div>
+</nav>
+
+<section class="section">
+  <div class="container">
+    {% block content %}{% endblock %}
+  </div>
+</section>
+
+</body>
+</html>

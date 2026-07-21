@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+
+{% block title %}
+Incident {{ incident.id }} – Details
+{% endblock %}
+
+{% block content %}
+<section class="section">
+  <div class="container">
+    <h1 class="title">Incident #{{ incident.id }}</h1>
+    <h2 class="subtitle">Run #{{ run.id }} (Request {{ run.request_id }})</h2>
+
+    <!-- Incident Summary -->
+    <div class="box">
+      <h2 class="title is-5">Incident Summary</h2>
+
+      <p><strong>Severity:</strong>
+        {% if incident.severity == "critical" %}
+          <span class="tag is-danger">Critical</span>
+        {% elif incident.severity == "high" %}
+          <span class="tag is-warning">High</span>
+        {% else %}
+          <span class="tag is-info">Medium</span>
+        {% endif %}
+      </p>
+
+      <p><strong>Description:</strong> {{ incident.description }}</p>
+      <p><strong>Created At:</strong> {{ incident.created_at }}</p>
+    </div>
+
+    <!-- Run Context -->
+    <div class="box">
+      <h2 class="title is-5">Run Context</h2>
+
+      <p><strong>Request ID:</strong> {{ run.request_id }}</p>
+      <p><strong>Risk Score:</strong> {{ run.risk_score }}</p>
+      <p><strong>Risk Level:</strong> {{ run.risk_level }}</p>
+      <p><strong>Requires Review:</strong> {{ run.requires_review }}</p>
+    </div>
+
+    <!-- Input Payload -->
+    <div class="box">
+      <h2 class="title is-5">Input Payload</h2>
+      <pre>{{ run.input_payload | tojson(indent=2) }}</pre>
+    </div>
+
+    <!-- Model Output -->
+    <div class="box">
+      <h2 class="title is-5">Model Output</h2>
+      <pre>{{ run.model_output | tojson(indent=2) }}</pre>
+    </div>
+
+    <!-- Safety Flags -->
+    <div class="box">
+      <h2 class="title is-5">Safety Flags</h2>
+      <pre>{{ run.safety_flags | tojson(indent=2) }}</pre>
+    </div>
+
+    <!-- Audit Timeline -->
+    <div class="box">
+      <h2 class="title is-5">Audit Timeline</h2>
+      <ul>
+        <li><strong>Run Created:</strong> {{ run.created_at }}</li>
+        <li><strong>Incident Created:</strong> {{ incident.created_at }}</li>
+        <li><strong>Risk Level:</strong> {{ run.risk_level }}</li>
+        <li><strong>Severity:</strong> {{ incident.severity }}</li>
+      </ul>
+    </div>
+
+    <div class="mt-4">
+      <a class="button is-link" href="/dashboard/incidents">Back to Incidents</a>
+    </div>
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="section">
+  <div class="container">
+
+    <h1 class="title">Table Metadata</h1>
+
+    <div class="mb-4">
+      <a href="/dashboard/metadata/scan" class="button is-primary">
+        Scan Table
+      </a>
+    </div>
+
+    {% if scanned %}
+    <div class="notification is-success">
+      Table scanned successfully.
+    </div>
+    {% endif %}
+
+    <table class="table is-fullwidth is-striped">
+      <thead>
+        <tr>
+          <th>Column</th>
+          <th>Type</th>
+          <th>Tags</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for m in metadata %}
+        <tr>
+          <td>{{ m.column_name }}</td>
+          <td>{{ m.column_type }}</td>
+          <td>
+            {% for tag in m.tags.split(",") %}
+              <span class="tag is-info">{{ tag }}</span>
+            {% endfor %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+  </div>
+</section>
+{% endblock %}

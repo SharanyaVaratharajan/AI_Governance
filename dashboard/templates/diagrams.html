@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="section">
+  <div class="container">
+
+    <h1 class="title">System Diagrams</h1>
+
+    <div class="box">
+      <h2 class="subtitle">Governance Flow</h2>
+      <pre>
+Mock Table Schema
+        ↓
+Column Scanner (PII + Type Rules)
+        ↓
+Tagged Columns (PII, Numeric, Free Text)
+        ↓
+Metadata Storage (table_metadata)
+        ↓
+Dashboard Rendering (/dashboard/metadata)
+      </pre>
+    </div>
+
+    <div class="box">
+      <h2 class="subtitle">AI Governance Tower Architecture</h2>
+      <pre>
+User Request
+      ↓
+Gateway API (/gateway/run)
+      ↓
+Governance Engine
+      ↓
+Risk Scoring + Safety Checks
+      ↓
+Run + Incident Logging
+      ↓
+Dashboard Visualization
+      </pre>
+    </div>
+
+  </div>
+</section>
+{% endblock %}

@@ -3,6 +3,42 @@ from typing import Dict, Any
 from sqlalchemy.orm import Session
 from models import ModelRun, Incident, AuditEvent, RiskLevel
 
+
+PII_COLUMN_TERMS = {
+    "email": "EMAIL",
+    "phone": "PHONE",
+    "address": "ADDRESS",
+    "ssn": "SSN",
+    "social_security": "SSN",
+    "passport": "PASSPORT",
+    "driver_license": "DRIVER_LICENSE",
+    "date_of_birth": "DATE_OF_BIRTH",
+    "dob": "DATE_OF_BIRTH",
+    "credit_card": "CREDIT_CARD",
+    "bank_account": "BANK_ACCOUNT",
+}
+
+
+def scan_table_for_pii(table: Dict[str, Any]) -> list[Dict[str, Any]]:
+    """Classify the supplied table metadata using PII-related column names."""
+    results = []
+    for column in table.get("columns", []):
+        name = column["name"]
+        normalized_name = name.lower().replace("-", "_").replace(" ", "_")
+        tags = [
+            tag
+            for term, tag in PII_COLUMN_TERMS.items()
+            if term in normalized_name
+        ]
+        results.append(
+            {
+                "column": name,
+                "type": column.get("type", "unknown"),
+                "tags": tags or ["NON_PII"],
+            }
+        )
+    return results
+
 def simple_risk_engine(system_risk_level: str, safety_flags: Dict[str, Any]):
     base = {
         "LOW": 0.2,
