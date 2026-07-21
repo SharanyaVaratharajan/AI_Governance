@@ -14,6 +14,17 @@ Includes:
 - SQLite database
 - Audit logging
 
+## Codex & GPT-5.6 contribution
+
+This project was developed with support from Codex running on GPT-5.6. It was used as a collaborative engineering assistant to:
+
+- diagnose FastAPI, Starlette/Jinja template, and SQLAlchemy serialization errors;
+- implement and validate the governance metadata scanner and dashboard routes;
+- improve the dashboard's documentation, diagrams, and GitHub repository links;
+- run local endpoint checks and Python compilation checks after changes.
+
+The application design, project goals, and final decisions remain owned by the project author.
+
 ---
 
 ## 🚀 Features
