@@ -1,46 +1,5 @@
 {% extends "base.html" %}
-
 {% block content %}
-<section class="section">
-  <div class="container">
-
-    <h1 class="title">Table Metadata</h1>
-
-    <div class="mb-4">
-      <a href="/dashboard/metadata/scan" class="button is-primary">
-        Scan Table
-      </a>
-    </div>
-
-    {% if scanned %}
-    <div class="notification is-success">
-      Table scanned successfully.
-    </div>
-    {% endif %}
-
-    <table class="table is-fullwidth is-striped">
-      <thead>
-        <tr>
-          <th>Column</th>
-          <th>Type</th>
-          <th>Tags</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for m in metadata %}
-        <tr>
-          <td>{{ m.column_name }}</td>
-          <td>{{ m.column_type }}</td>
-          <td>
-            {% for tag in m.tags.split(",") %}
-              <span class="tag is-info">{{ tag }}</span>
-            {% endfor %}
-          </td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-
-  </div>
-</section>
+<div class="ct-page"><header class="ct-page-hero"><div><p class="ct-eyebrow">Data governance</p><h1 class="title is-3">Table metadata</h1><p class="subtitle is-6">Inspect schema-level classifications and potential PII.</p></div><a href="/dashboard/metadata/scan" class="button is-primary ct-button">Scan table</a></header>{% if scanned %}<div data-toast-message="Table scan complete" data-toast-kind="success"></div><div class="notification is-success is-light">Table scan complete. Created {{ scan_summary.created }}, updated {{ scan_summary.updated }}, and removed {{ scan_summary.duplicates_removed }} duplicate rows.</div>{% endif %}
+<section class="ct-card"><div class="ct-card-header"><div><h2 class="ct-card-title">Column classifications</h2><p class="ct-card-subtitle">Detected tags from the configured mock table</p></div><span class="tag is-light ct-pill">{{ metadata|length }} columns</span></div>{% if metadata %}<div class="table-container"><table class="table is-fullwidth ct-table"><thead><tr><th>Table</th><th>Column</th><th>Type</th><th>Governance tags</th></tr></thead><tbody>{% for m in metadata %}<tr><td>{{ m.table_name }}</td><td><strong>{{ m.column_name }}</strong></td><td><code>{{ m.column_type }}</code></td><td>{% for tag in m.tags.split(',') %}<span class="tag is-info is-light ct-pill mr-1">{{ tag }}</span>{% endfor %}</td></tr>{% endfor %}</tbody></table></div>{% else %}<div class="ct-empty"><strong>No metadata has been scanned</strong>Run a table scan to populate this view.</div>{% endif %}</section></div>
 {% endblock %}

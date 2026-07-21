@@ -1,31 +1,5 @@
-{% extends "base.html" %}
-
+﻿{% extends "base.html" %}
 {% block content %}
-<section class="section">
-  <div class="container">
-
-    <h1 class="title">Project Documents</h1>
-
-    <div class="content">
-      <p>This page displays key governance documents used by the AI Governance Tower.</p>
-      <p>
-        <a class="button is-link is-light"
-           href="https://github.com/SharanyaVaratharajan/AI_Governance"
-           target="_blank"
-           rel="noopener noreferrer">View on GitHub</a>
-      </p>
-    </div>
-
-    <div class="box">
-      <h2 class="subtitle">judge.md</h2>
-      <pre style="white-space: pre-wrap;">{{ judge_md }}</pre>
-    </div>
-
-    <div class="box">
-      <h2 class="subtitle">README.md</h2>
-      <pre style="white-space: pre-wrap;">{{ readme_md }}</pre>
-    </div>
-
-  </div>
-</section>
+<div class="ct-page"><header class="ct-page-hero"><div><p class="ct-eyebrow">Project resources</p><h1 class="title is-3">Governance documents</h1><p class="subtitle is-6">Reference material supporting the AI Governance Control Tower.</p></div><a class="button is-primary ct-button" href="https://github.com/SharanyaVaratharajan/AI_Governance" target="_blank" rel="noopener noreferrer">Open GitHub</a></header>
+<div class="columns is-variable is-4"><div class="column"><section class="ct-card"><div class="ct-card-header"><div><h2 class="ct-card-title">judge.md</h2><p class="ct-card-subtitle">Evaluation guidance</p></div></div><div class="ct-card-body"><pre class="ct-code">{{ judge_md }}</pre></div></section></div><div class="column"><section class="ct-card"><div class="ct-card-header"><div><h2 class="ct-card-title">README.md</h2><p class="ct-card-subtitle">Project overview</p></div></div><div class="ct-card-body"><pre class="ct-code">{{ readme_md }}</pre></div></section></div></div></div>
 {% endblock %}

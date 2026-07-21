@@ -21,7 +21,11 @@ This project was developed with support from Codex running on GPT-5.6. It was us
 - diagnose FastAPI, Starlette/Jinja template, and SQLAlchemy serialization errors;
 - implement and validate the governance metadata scanner and dashboard routes;
 - improve the dashboard's documentation, diagrams, and GitHub repository links;
-- run local endpoint checks and Python compilation checks after changes.
+- run local endpoint checks and Python compilation checks after changes;
+- design and implement the Governance Gateway UI, dashboard overview, filtering, run drill-down, incident-review workflow, audit-log view, and CSV report endpoints;
+- add preflight PII redaction, phishing decision handling, per-system PII policies, and safe PII preview patterns;
+- implement idempotent table-metadata scans and repeatable demo-data seeding;
+- update project and judge documentation to reflect the completed capabilities.
 
 The application design, project goals, and final decisions remain owned by the project author.
 
@@ -190,3 +194,44 @@ lineage tracking
 dataset risk scoring
 
 integration with future ingestion pipelines
+
+---
+
+## Governance Safety and Dashboard Enhancements
+
+### Preflight: inspect before a model call
+
+The Governance Gateway at `POST /governance/run` evaluates input before it reaches a model:
+
+| Decision | Behavior |
+| --- | --- |
+| `ALLOW` | Continue normally. |
+| `REDACT` | Replace recognised PII with typed placeholders before model processing and storage. |
+| `REVIEW` | Hold suspicious content for governance review. |
+| `BLOCK` | Do not call the model for high-confidence phishing or disallowed PII. |
+
+The persisted input payload is sanitized. The run safety flags and API response expose PII redaction types, the preflight decision, and whether a model call occurred.
+
+### System policies
+
+Users can register and edit systems from the Systems dashboard. Each system selects a PII policy:
+
+- `REDACT` � default safe policy;
+- `BLOCK` � stop requests that contain recognised PII;
+- `ALLOW` � only for approved workflows.
+
+### Dashboard and auditability
+
+- Governance Tower overview with open-incident, high-risk-24-hour, and awaiting-review KPIs.
+- Dedicated Gateway workspace with cURL preview, copy feedback, and live result status.
+- Filters and date ranges for Systems, Runs, and Incidents.
+- Run detail pages with model input/output, safety flags, preflight badges, and PII-safe before/after preview.
+- Incident review workflow with status, reviewer, notes, and audit events.
+- Audit Log page for governance evidence.
+- Filter-respecting CSV reports for Runs and Incidents.
+- Dark-mode preference and toast feedback.
+- Idempotent Seed Demo Data button for a repeatable presentation dataset.
+
+### Idempotent metadata scans
+
+The Metadata Scan UI and API upsert metadata by table and column. Repeat scans update classifications and remove older duplicate rows.

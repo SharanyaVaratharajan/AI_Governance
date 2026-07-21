@@ -1,51 +1,46 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>AI Governance Dashboard</title>
-
-    <!-- Mermaid.js -->
-    <script src="https://unpkg.com/mermaid@10/dist/mermaid.min.js"></script>
-    <script>
-      mermaid.initialize({ startOnLoad: true });
-    </script>
-
-    <!-- Bulma CSS -->
-    <link rel="stylesheet"
-          href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}AI Governance Control Tower{% endblock %}</title>
+  <script src="https://unpkg.com/mermaid@10/dist/mermaid.min.js"></script>
+  <script>mermaid.initialize({ startOnLoad: true });</script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+  <style>
+    :root { --ct-ink:#172033; --ct-muted:#667085; --ct-line:#e5eaf2; --ct-brand:#635bff; --ct-panel:#fff; --ct-bg:#f7f8fc; }
+    html { background: var(--ct-bg); } body { min-height:100vh; color:var(--ct-ink); background:radial-gradient(circle at 94% 2%, #eef0ff 0, transparent 24rem), var(--ct-bg); }
+    .navbar.ct-nav { min-height:4.4rem; background:#181c32; box-shadow:0 2px 12px rgba(20,24,50,.16); padding:0 max(1rem, calc((100vw - 1180px)/2)); }
+    .ct-nav .navbar-brand { align-items:center; } .ct-brand { color:#fff !important; font-weight:750; letter-spacing:.01em; padding-left:0; } .ct-brand-mark { display:inline-grid; place-items:center; width:28px; height:28px; margin-right:.55rem; border-radius:8px; background:linear-gradient(135deg,#7d73ff,#42d8bd); color:#151936; font-size:.82rem; }
+    .ct-nav .navbar-item { color:#cbd2e8; font-size:.9rem; border-radius:8px; margin:.45rem .1rem; padding:.55rem .75rem; } .ct-nav .navbar-item:hover, .ct-nav .navbar-item.is-active { color:#fff; background:rgba(255,255,255,.11); } .ct-nav .ct-nav-action { margin-left:.55rem; background:linear-gradient(100deg,#7067ff,#4acdb7); color:#fff; font-weight:750; box-shadow:0 5px 12px rgba(0,0,0,.2); } .ct-nav .ct-nav-action:hover, .ct-nav .ct-nav-action.is-active { background:linear-gradient(100deg,#8078ff,#59dbc5); }
+    .ct-main { padding:1.5rem 1.5rem 3rem; } .ct-container { max-width:1180px !important; }
+    .ct-page { color:var(--ct-ink); } .ct-page-hero { display:flex; align-items:center; justify-content:space-between; gap:1.25rem; padding:1rem 0 1.2rem; } .ct-page-hero > div:first-child { display:flex; flex-direction:column; align-items:flex-start; } .ct-eyebrow { color:var(--ct-brand); font-size:.74rem; font-weight:750; letter-spacing:.12em; text-transform:uppercase; margin:0 0 .5rem; } .ct-page-hero .title { margin:0 0 .6rem !important; color:var(--ct-ink); line-height:1.08 !important; } .ct-page-hero .subtitle { color:var(--ct-muted); margin:0 !important; line-height:1.4 !important; }
+    .ct-card { background:var(--ct-panel); border:1px solid var(--ct-line); border-radius:16px; box-shadow:0 10px 26px rgba(27,39,94,.06); overflow:hidden; } .ct-card-header { display:flex; justify-content:space-between; align-items:center; padding:1.15rem 1.25rem; border-bottom:1px solid var(--ct-line); } .ct-card-title { margin:0; font-size:1rem; font-weight:720; } .ct-card-subtitle { margin:.18rem 0 0; color:var(--ct-muted); font-size:.82rem; } .ct-card-body { padding:1.25rem; }
+    .ct-table { margin:0; } .ct-table thead th { background:#f8faff; color:#667085; border-width:0 0 1px; border-color:var(--ct-line); font-size:.72rem; letter-spacing:.055em; padding:.85rem 1rem; text-transform:uppercase; } .ct-table td { vertical-align:middle; border-color:#edf0f5; padding:.9rem 1rem; } .ct-table tr:hover { background:#fafbff; }
+    .ct-button { background:linear-gradient(100deg,#635bff,#7b6ef6); border:0; border-radius:9px; box-shadow:0 7px 14px rgba(99,91,255,.2); font-weight:700; } .ct-button:hover { transform:translateY(-1px); } .ct-pill { border-radius:999px; font-size:.73rem; font-weight:700; padding:.34rem .62rem; } .ct-code { background:#f6f7fb; border:1px solid #e7eaf1; border-radius:10px; color:#344054; font:.8rem/1.55 ui-monospace,SFMono-Regular,Menlo,monospace; padding:1rem; white-space:pre-wrap; overflow:auto; }
+    .ct-filter-bar { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)) auto; gap:.75rem; align-items:end; padding:1rem; margin-bottom:1.25rem; background:#fff; border:1px solid var(--ct-line); border-radius:14px; box-shadow:0 8px 20px rgba(27,39,94,.04); } .ct-filter-bar .field { margin:0; } .ct-filter-bar .label { color:var(--ct-muted); font-size:.72rem; margin-bottom:.35rem; text-transform:uppercase; letter-spacing:.05em; } .ct-filter-bar .select, .ct-filter-bar .select select { width:100%; } .ct-filter-action { display:flex; gap:.5rem; align-items:end; }    .ct-empty { padding:3.5rem 1rem; color:var(--ct-muted); text-align:center; } .ct-empty strong { color:var(--ct-ink); display:block; margin-bottom:.3rem; } .ct-detail-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:.8rem; } .ct-stat { border:1px solid var(--ct-line); background:#fafbff; border-radius:11px; padding:.8rem; } .ct-stat-label { color:var(--ct-muted); display:block; font-size:.72rem; font-weight:700; letter-spacing:.05em; text-transform:uppercase; } .ct-stat-value { display:block; font-size:.95rem; font-weight:700; margin-top:.3rem; }
+    @media (max-width:768px) { .ct-filter-bar { grid-template-columns:1fr; } .ct-filter-action { align-items:stretch; } .ct-nav { padding:0 1rem !important; } .ct-main { padding:1.25rem 1rem 2rem; } .ct-page-hero { align-items:flex-start; flex-direction:column; } .ct-detail-grid { grid-template-columns:1fr; } }
+    .ct-theme-toggle { background:transparent; border:1px solid rgba(255,255,255,.22); border-radius:8px; color:#dfe5fa; cursor:pointer; font-size:.8rem; margin:.45rem 0 .45rem .7rem; padding:.5rem .7rem; } .ct-theme-toggle:hover { background:rgba(255,255,255,.1); color:#fff; }
+    .ct-toast { position:fixed; right:1.25rem; bottom:1.25rem; z-index:1000; max-width:340px; padding:.85rem 1rem; border-radius:10px; background:#172033; box-shadow:0 12px 28px rgba(0,0,0,.22); color:#fff; opacity:0; pointer-events:none; transform:translateY(10px); transition:opacity .2s,transform .2s; } .ct-toast.is-visible { opacity:1; transform:translateY(0); } .ct-toast.success { background:#087f5b; } .ct-toast.error { background:#b42318; }
+    body.dark-mode { --ct-ink:#e8ecf8; --ct-muted:#a8b0c8; --ct-line:#303954; --ct-panel:#1e263d; --ct-bg:#111628; background:radial-gradient(circle at 94% 2%,#20285c 0,transparent 24rem),#111628; } body.dark-mode .ct-card, body.dark-mode .gateway-card, body.dark-mode .status-card, body.dark-mode .chart-card, body.dark-mode .history-card { background:#1e263d; border-color:#303954; } body.dark-mode .ct-table thead th, body.dark-mode .run-table thead th { background:#252e48; color:#c9d1e8; border-color:#303954; } body.dark-mode .ct-table td, body.dark-mode .run-table tbody td { border-color:#303954; color:#e8ecf8; } body.dark-mode .ct-table tr:hover, body.dark-mode .run-table tbody tr:hover { background:#252e48; } body.dark-mode .ct-code, body.dark-mode .output, body.dark-mode .textarea { background:#171d31; border-color:#3a4564; color:#e8ecf8; } body.dark-mode .ct-stat { background:#252e48; border-color:#303954; } body.dark-mode .ct-card-title, body.dark-mode .section-title, body.dark-mode .label { color:#e8ecf8; }  </style>
 </head>
-
 <body>
-<nav class="navbar is-dark">
-  <div class="navbar-menu">
-    <div class="navbar-start">
-
-      <a class="navbar-item {% if active_page=='systems' %}is-active{% endif %}"
-         href="/dashboard/systems">Systems</a>
-
-      <a class="navbar-item {% if active_page=='runs' %}is-active{% endif %}"
-         href="/dashboard/runs">Runs</a>
-
-      <a class="navbar-item {% if active_page=='incidents' %}is-active{% endif %}"
-         href="/dashboard/incidents">Incidents</a>
-
-      <a class="navbar-item {% if active_page=='metadata' %}is-active{% endif %}"
-         href="/dashboard/metadata">Metadata</a>
-
-      <a class="navbar-item {% if active_page=='documents' %}is-active{% endif %}"
-         href="/dashboard/documents">Documents</a>
-
-      <a class="navbar-item {% if active_page=='diagrams' %}is-active{% endif %}"
-         href="/dashboard/diagrams">Diagrams</a>
-
-    </div>
-  </div>
-</nav>
-
-<section class="section">
-  <div class="container">
-    {% block content %}{% endblock %}
-  </div>
-</section>
-
-</body>
+<nav class="navbar ct-nav" role="navigation"><div class="navbar-brand"><a class="navbar-item ct-brand" href="/dashboard/"><span class="ct-brand-mark">◆</span>Governance Tower</a></div><div class="navbar-menu is-active"><div class="navbar-start"><a class="navbar-item {% if active_page=='systems' %}is-active{% endif %}" href="/dashboard/systems">Systems</a><a class="navbar-item {% if active_page=='runs' %}is-active{% endif %}" href="/dashboard/runs">Runs</a><a class="navbar-item {% if active_page=='incidents' %}is-active{% endif %}" href="/dashboard/incidents">Incidents</a><a class="navbar-item {% if active_page=='metadata' %}is-active{% endif %}" href="/dashboard/metadata">Metadata</a><a class="navbar-item {% if active_page=='documents' %}is-active{% endif %}" href="/dashboard/documents">Documents</a><a class="navbar-item {% if active_page=='diagrams' %}is-active{% endif %}" href="/dashboard/diagrams">Diagrams</a><a class="navbar-item {% if active_page=='audit' %}is-active{% endif %}" href="/dashboard/audit">Audit</a></div><div class="navbar-end"><a class="navbar-item ct-nav-action {% if active_page=='gateway' %}is-active{% endif %}" href="/dashboard/gateway">▶ Run Gateway</a><button id="theme-toggle" class="ct-theme-toggle" type="button">◐ Theme</button></div></div></nav>
+<main class="section ct-main"><div class="container ct-container">{% block content %}{% endblock %}</div></main>
+<div id="toast" class="ct-toast" role="status" aria-live="polite"></div>
+<script>
+  window.showToast = function(message, kind = "success") {
+    const toast = document.getElementById("toast");
+    toast.textContent = message;
+    toast.className = "ct-toast " + kind + " is-visible";
+    clearTimeout(window.toastTimer);
+    window.toastTimer = setTimeout(() => toast.classList.remove("is-visible"), 3200);
+  };
+  const queuedToast = document.querySelector("[data-toast-message]");
+  if (queuedToast) showToast(queuedToast.dataset.toastMessage, queuedToast.dataset.toastKind || "success");
+  const themeToggle = document.getElementById("theme-toggle");
+  const applyTheme = (dark) => { document.body.classList.toggle("dark-mode", dark); themeToggle.textContent = dark ? "☀ Light" : "◐ Theme"; };
+  try { applyTheme(localStorage.getItem("ct-theme") === "dark"); } catch (_) { applyTheme(false); }
+  themeToggle.addEventListener("click", () => { const dark = !document.body.classList.contains("dark-mode"); applyTheme(dark); try { localStorage.setItem("ct-theme", dark ? "dark" : "light"); } catch (_) {} });
+</script></body>
 </html>

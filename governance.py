@@ -1,7 +1,7 @@
 from uuid import uuid4
 from typing import Dict, Any
 from sqlalchemy.orm import Session
-from models import ModelRun, Incident, AuditEvent, RiskLevel
+from models import ModelRun, Incident, AuditEvent, RiskLevel, TableMetadata
 
 
 PII_COLUMN_TERMS = {
@@ -38,6 +38,30 @@ def scan_table_for_pii(table: Dict[str, Any]) -> list[Dict[str, Any]]:
             }
         )
     return results
+
+def store_table_metadata_scan(session: Session, table_name: str, results: list[Dict[str, Any]]) -> dict[str, int]:
+    """Upsert metadata by table/column and remove legacy duplicate rows."""
+    created = updated = duplicates_removed = 0
+    for result in results:
+        records = (
+            session.query(TableMetadata)
+            .filter_by(table_name=table_name, column_name=result["column"])
+            .order_by(TableMetadata.id)
+            .all()
+        )
+        tags = ",".join(result["tags"])
+        if records:
+            metadata = records[0]
+            metadata.column_type = result["type"]
+            metadata.tags = tags
+            updated += 1
+            for duplicate in records[1:]:
+                session.delete(duplicate)
+                duplicates_removed += 1
+        else:
+            session.add(TableMetadata(table_name=table_name, column_name=result["column"], column_type=result["type"], tags=tags))
+            created += 1
+    return {"created": created, "updated": updated, "duplicates_removed": duplicates_removed}
 
 def simple_risk_engine(system_risk_level: str, safety_flags: Dict[str, Any]):
     base = {

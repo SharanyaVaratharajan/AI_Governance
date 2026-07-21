@@ -22,6 +22,7 @@ class AiSystem(Base):
     description = Column(Text)
     risk_level = Column(String(32), default=RiskLevel.MEDIUM.value)
     status = Column(String(32), default="APPROVED")
+    pii_policy = Column(String(32), default="REDACT")
     created_at = Column(DateTime, default=datetime.utcnow)
 
     runs = relationship("ModelRun", back_populates="system")

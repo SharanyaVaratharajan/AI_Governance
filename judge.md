@@ -273,3 +273,60 @@ schema versioning
 lineage tracking
 
 automated compliance checks
+
+---
+
+## Recent Governance Enhancements
+
+### Safer gateway preflight
+
+`POST /governance/run` performs a preflight check before a model call. It returns one of four decisions:
+
+- `ALLOW` � request can continue.
+- `REDACT` � recognised PII is replaced with typed placeholders such as `[REDACTED_EMAIL]`.
+- `REVIEW` � a suspicious request needs human attention.
+- `BLOCK` � high-confidence phishing or a system policy prevents the model call.
+
+Recognised PII is sanitized before model processing and before it is stored in `model_runs.input_payload`. Safety flags record `pii_redacted`, `redacted_types`, `preflight_decision`, and whether the model was called. The gateway response includes the redaction and preflight result.
+
+### Per-system PII policy
+
+Systems can be registered and edited from the UI. Each system has a PII policy:
+
+- `REDACT` (default)
+- `BLOCK`
+- `ALLOW` for approved workflows
+
+### Dashboard controls and evidence
+
+The dashboard now includes:
+
+- a distinct Governance Tower overview with live KPIs;
+- a Run Gateway action workspace;
+- Systems, Runs, and Incidents search/filter controls, including date ranges;
+- run drill-down pages with input, output, safety flags, preflight decision, a PII Redacted badge, and a safe preview that withholds original values;
+- incident review workflow (status, reviewer, and notes);
+- an Audit page for risk evaluations, incidents, reviews, and seeded events;
+- CSV exports for filtered runs and incidents;
+- dark mode and action toast feedback;
+- an idempotent Seed Demo Data button that creates two systems, three runs, two incidents, and audit events without duplicate records.
+
+### Metadata scanning
+
+Table scans are idempotent. Re-scanning updates existing table/column metadata and removes legacy duplicate rows instead of creating duplicate metadata records.
+
+---
+
+# Codex Contribution Summary
+
+Codex (GPT-5.6) was used as a collaborative engineering assistant during development. It helped inspect the FastAPI/SQLAlchemy/Jinja application, implement scoped features, and run local verification checks. Its contributions included:
+
+- building the dashboard navigation, Governance Gateway input workspace, live response view, cURL preview, dark-mode preference, and toast feedback;
+- improving Systems, Runs, Incidents, Metadata, Documents, Diagrams, and detail-page presentation;
+- adding system registration/editing, page filters, date ranges, run drill-down, incident review controls, audit evidence, and CSV report exports;
+- implementing pre-model governance controls: PII redaction, typed redaction flags, phishing preflight decisions, per-system PII policies, and safe previews that withhold original sensitive values;
+- making metadata scans and demo-data seeding idempotent;
+- diagnosing and correcting the SQLite `pii_policy` migration issue; and
+- validating Python compilation, database migration behavior, page responses, and isolated safety/redaction cases.
+
+The project author retains ownership of the application design, the governance policies, all final implementation decisions, and the submitted work.

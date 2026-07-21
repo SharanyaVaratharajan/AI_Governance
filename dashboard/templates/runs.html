@@ -1,159 +1,50 @@
 {% extends "base.html" %}
 {% block content %}
-
-<h1 class="title">Recent Runs</h1>
-<p class="subtitle">Risk distribution and governance activity</p>
-
-<!-- Risk Level Distribution Chart -->
-<div class="box">
-<h2 class="title is-5">Risk Level Distribution</h2>
-<canvas id="riskLevelChart"></canvas>
+<style>
+  .runs-page { --ink: #172033; --muted: #667085; --line: #e5eaf2; --brand: #635bff; color: var(--ink); }
+  .runs-hero { background: radial-gradient(circle at 88% 15%, rgba(112, 236, 211, .24), transparent 27%), linear-gradient(120deg, #171c42, #292477 58%, #4033a5); border-radius: 22px; color: #fff; padding: 2.25rem; box-shadow: 0 18px 42px rgba(37,31,112,.2); margin-bottom: 1.6rem; }
+  .runs-eyebrow { color: #8ff4df; font-size: .75rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; } .runs-hero .title, .runs-hero .subtitle { color: #fff; } .runs-hero .title { line-height: 1.1; margin-bottom: .6rem !important; } .runs-hero .subtitle { margin-top: 0 !important; opacity: .8; }
+  .metric-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: .85rem; margin-top: 1.5rem; } .metric { padding: .9rem 1rem; border: 1px solid rgba(255,255,255,.14); background: rgba(255,255,255,.1); border-radius: 12px; } .metric-value { display: block; font-size: 1.4rem; font-weight: 750; line-height: 1.2; } .metric-label { color: rgba(255,255,255,.72); font-size: .73rem; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; }
+  .chart-card, .history-card { border: 1px solid var(--line); border-radius: 18px; background: #fff; box-shadow: 0 12px 30px rgba(27,39,94,.07); overflow: hidden; height: 100%; } .card-heading { display: flex; align-items: flex-start; justify-content: space-between; padding: 1.25rem 1.35rem .55rem; } .card-heading h2 { margin: 0; font-size: 1rem; font-weight: 700; } .card-heading p { margin: .2rem 0 0; color: var(--muted); font-size: .82rem; } .chart-wrap { height: 255px; padding: .5rem 1.25rem 1.25rem; }
+  .history-card { margin-top: 1.35rem; } .history-card .card-heading { padding-bottom: 1rem; } .run-table { margin: 0; } .run-table thead th { color: #667085; background: #f8faff; border-width: 0 0 1px; font-size: .72rem; letter-spacing: .05em; text-transform: uppercase; padding: .85rem 1rem; } .run-table tbody td { vertical-align: middle; border-color: #eef1f6; padding: .85rem 1rem; font-size: .9rem; } .run-table tbody tr:hover { background: #fafbff; } .request-id { color: #475467; font: .76rem ui-monospace, SFMono-Regular, Menlo, monospace; } .score { font-weight: 700; color: #344054; } .risk-tag { border-radius: 999px; font-size: .72rem; font-weight: 700; padding: .35rem .65rem; text-transform: uppercase; } .risk-low { color: #087f5b; background: #e7f8f0; } .risk-medium { color: #a35c00; background: #fff5d8; } .risk-high { color: #c43238; background: #fff0f1; } .risk-critical { color: #fff; background: #7f1d2d; } .review-yes { color: #b42318; font-weight: 700; } .review-no { color: #087f5b; font-weight: 700; } .empty-state { padding: 3.5rem 1rem; text-align: center; color: var(--muted); } .empty-state strong { color: var(--ink); display: block; margin-bottom: .35rem; }
+  @media (max-width: 768px) { .runs-hero { padding: 1.6rem; } .metric-grid { grid-template-columns: repeat(2, 1fr); } .run-table { min-width: 700px; } }
+</style>
+<div class="runs-page">
+  <section class="runs-hero">
+    <p class="runs-eyebrow mb-3">AI Governance Control Tower</p>
+    <h1 class="title is-2">Governance activity</h1>
+    <p class="subtitle is-5">Monitor model runs, risk distribution, and review decisions.</p>
+    <div class="metric-grid">
+      <div class="metric"><span id="total-runs" class="metric-value">{{ runs|length }}</span><span class="metric-label">Recent runs</span></div>
+      <div class="metric"><span id="review-runs" class="metric-value">—</span><span class="metric-label">Need review</span></div>
+      <div class="metric"><span id="average-risk" class="metric-value">—</span><span class="metric-label">Average risk</span></div>
+      <div class="metric"><span id="critical-runs" class="metric-value">—</span><span class="metric-label">Critical runs</span></div>
+    </div>
+  </section>
+  <form class="ct-filter-bar" method="get"><div class="field"><label class="label">System</label><div class="control select is-fullwidth"><select name="system_id"><option value="">All systems</option>{% for system in systems %}<option value="{{ system.id }}" {% if filters.system_id == system.id %}selected{% endif %}>{{ system.name }}</option>{% endfor %}</select></div></div><div class="field"><label class="label">Risk level</label><div class="control select is-fullwidth"><select name="risk_level"><option value="">All levels</option>{% for level in ["low", "medium", "high", "critical"] %}<option value="{{ level }}" {% if filters.risk_level == level %}selected{% endif %}>{{ level|title }}</option>{% endfor %}</select></div></div><div class="field"><label class="label">Review</label><div class="control select is-fullwidth"><select name="review"><option value="">Any decision</option><option value="yes" {% if filters.review == "yes" %}selected{% endif %}>Required</option><option value="no" {% if filters.review == "no" %}selected{% endif %}>Cleared</option></select></div></div><div class="field"><label class="label">Created from</label><div class="control"><input class="input" type="date" name="date_from" value="{{ filters.date_from }}"></div></div><div class="field"><label class="label">Created to</label><div class="control"><input class="input" type="date" name="date_to" value="{{ filters.date_to }}"></div></div><div class="field ct-filter-action"><button class="button is-primary ct-button">Filter runs</button><a class="button is-light" href="/dashboard/runs">Reset</a></div></form>    <div class="columns is-variable is-4">
+    <div class="column is-6"><section class="chart-card"><div class="card-heading"><div><h2>Risk distribution</h2><p>Runs grouped by governance level</p></div></div><div class="chart-wrap"><canvas id="riskLevelChart"></canvas></div></section></div>
+    <div class="column is-6"><section class="chart-card"><div class="card-heading"><div><h2>Risk score trend</h2><p>Score movement across recent runs</p></div></div><div class="chart-wrap"><canvas id="riskScoreChart"></canvas></div></section></div>
+  </div>
+  <div class="columns is-variable is-4"><div class="column is-6"><section class="chart-card"><div class="card-heading"><div><h2>Risk heatmap</h2><p>Score concentration by risk level</p></div></div><div class="chart-wrap"><canvas id="riskHeatmap"></canvas></div></section></div><div class="column is-6"><section class="chart-card"><div class="card-heading"><div><h2>Review queue</h2><p>Governance decision split</p></div></div><div class="chart-wrap"><canvas id="reviewChart"></canvas></div></section></div></div>
+  <section class="history-card"><div class="card-heading"><div><h2>Recent run history</h2><p>Latest 50 governance gateway evaluations</p></div><a class="button is-small is-light" href="/dashboard/reports/runs.csv?risk_level={{ filters.risk_level }}&review={{ filters.review }}&system_id={{ filters.system_id or '' }}&date_from={{ filters.date_from }}&date_to={{ filters.date_to }}">Export CSV</a></div>
+    {% if runs %}<div class="table-container"><table class="table is-fullwidth run-table"><thead><tr><th>Request ID</th><th>System</th><th>Risk score</th><th>Risk level</th><th>Review</th><th>Preflight</th><th>Data protection</th><th></th></tr></thead><tbody>{% for r in runs %}<tr><td><span class="request-id">{{ r.request_id }}</span></td><td><strong>{{ r.system_name }}</strong></td><td><span class="score">{{ '%.2f'|format(r.risk_score or 0) }}</span></td><td><span class="risk-tag risk-{{ r.risk_level|lower }}">{{ r.risk_level }}</span></td><td>{% if r.requires_review %}<span class="review-yes">Required</span>{% else %}<span class="review-no">Cleared</span>{% endif %}</td><td><span class="tag {% if r.preflight_decision == 'BLOCK' %}is-danger{% elif r.preflight_decision == 'REVIEW' %}is-warning{% else %}is-success{% endif %} is-light ct-pill">{{ r.preflight_decision }}</span></td><td>{% if r.pii_redacted %}<span class="tag is-warning ct-pill">PII redacted</span>{% else %}<span class="has-text-grey-light">—</span>{% endif %}</td><td><a class="button is-small is-light" href="/dashboard/runs/{{ r.id }}">Details</a></td></tr>{% endfor %}</tbody></table></div>{% else %}<div class="empty-state"><strong>No governance runs yet</strong>Run an assessment from the Gateway page to populate this dashboard.</div>{% endif %}
+  </section>
 </div>
-
-<!-- Risk Score Trend Chart -->
-<div class="box">
-<h2 class="title is-5">Risk Score Trend</h2>
-<canvas id="riskScoreChart"></canvas>
-</div>
-
-<!-- Risk Heatmap -->
-<div class="box">
-<h2 class="title is-5">Risk Heatmap</h2>
-<canvas id="riskHeatmap"></canvas>
-</div>
-
-<!-- Runs Table -->
-<table class="table is-striped is-fullwidth">
-<thead>
-<tr>
-<th>Request ID</th>
-<th>System</th>
-<th>Risk Score</th>
-<th>Risk Level</th>
-<th>Review?</th>
-</tr>
-</thead>
-<tbody>
-{% for r in runs %}
-<tr>
-<td>{{ r.request_id }}</td>
-<td>{{ r.system_name }}</td>
-<td>{{ r.risk_score }}</td>
-<td>{{ r.risk_level }}</td>
-<td>{{ r.requires_review }}</td>
-</tr>
-{% endfor %}
-</tbody>
-</table>
-
-<!-- Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
 <script>
-// Correct JSON parsing for Jinja2
-const runs = {{ runs | tojson }};
-
-// -----------------------------
-// Risk Level Distribution Chart
-//------------------------------
-const riskLevels = runs.map(r => r.risk_level);
-const levelCounts = {
-low: riskLevels.filter(l => l === "low").length,
-medium: riskLevels.filter(l => l === "medium").length,
-high: riskLevels.filter(l => l === "high").length,
-critical: riskLevels.filter(l => l === "critical").length
-};
-
-new Chart(document.getElementById("riskLevelChart"), {
-type: "bar",
-data: {
-labels: ["Low", "Medium", "High", "Critical"],
-datasets: [{
-label: "Risk Level Count",
-data: [
-levelCounts.low,
-levelCounts.medium,
-levelCounts.high,
-levelCounts.critical
-],
-backgroundColor: ["#48c774", "#ffdd57", "#f14668", "#b71c1c"]
-}]
-},
-options: {
-responsive: true,
-plugins: { legend: { position: "bottom" } }
-}
-});
-
-// -----------------------------
-// Risk Score Trend Chart
-//------------------------------
-const riskScores = runs.map(r => r.risk_score);
-const timestamps = runs.map(r => r.created_at);
-
-new Chart(document.getElementById("riskScoreChart"), {
-type: "line",
-data: {
-labels: timestamps,
-datasets: [{
-label: "Risk Score",
-data: riskScores,
-borderColor: "#3273dc",
-fill: false,
-tension: 0.2
-}]
-},
-options: {
-responsive: true,
-plugins: { legend: { position: "bottom" } },
-scales: {
-x: { title: { display: true, text: "Timestamp" } },
-y: { title: { display: true, text: "Risk Score" }, min: 0, max: 1 }
-}
-}
-});
-
-// -----------------------------
-// Risk Heatmap (Scatter Plot)
-//------------------------------
-const heatmapData = {
-datasets: [{
-label: "Risk Score Heatmap",
-data: runs.map(r => ({
-x: r.risk_level,
-y: r.risk_score
-})),
-backgroundColor: function(context) {
-const value = context.raw.y;
-if (value < 0.3) return "#48c774"; // green
-if (value < 0.6) return "#ffdd57"; // yellow
-if (value < 0.8) return "#f14668"; // red
-return "#b71c1c"; // dark red
-},
-pointRadius: 8
-}]
-};
-
-new Chart(document.getElementById("riskHeatmap"), {
-type: "scatter",
-data: heatmapData,
-options: {
-responsive: true,
-scales: {
-x: {
-type: "category",
-labels: ["low", "medium", "high", "critical"],
-title: { display: true, text: "Risk Level" }
-},
-y: {
-min: 0,
-max: 1,
-title: { display: true, text: "Risk Score" }
-}
-}
-}
-});
-
+  const runs = {{ runs | tojson }};
+  const palette = { low: '#31b985', medium: '#f0b429', high: '#ef6b73', critical: '#8e2440' };
+  const riskLevels = ['low', 'medium', 'high', 'critical'];
+  const levelCounts = Object.fromEntries(riskLevels.map(level => [level, runs.filter(run => run.risk_level === level).length]));
+  const reviewCount = runs.filter(run => run.requires_review).length;
+  const averageRisk = runs.length ? runs.reduce((sum, run) => sum + (Number(run.risk_score) || 0), 0) / runs.length : 0;
+  document.getElementById('review-runs').textContent = reviewCount;
+  document.getElementById('average-risk').textContent = runs.length ? averageRisk.toFixed(2) : '—';
+  document.getElementById('critical-runs').textContent = levelCounts.critical;
+  const defaults = { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { usePointStyle: true, boxWidth: 8, padding: 16 } } } };
+  new Chart(document.getElementById('riskLevelChart'), { type: 'bar', data: { labels: ['Low', 'Medium', 'High', 'Critical'], datasets: [{ data: riskLevels.map(level => levelCounts[level]), backgroundColor: riskLevels.map(level => palette[level]), borderRadius: 7, borderSkipped: false }] }, options: { ...defaults, plugins: { ...defaults.plugins, legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { precision: 0 }, grid: { color: '#edf0f5' } }, x: { grid: { display: false } } } } });
+  new Chart(document.getElementById('riskScoreChart'), { type: 'line', data: { labels: runs.map(run => run.created_at ? new Date(run.created_at).toLocaleDateString() : 'Unknown').reverse(), datasets: [{ label: 'Risk score', data: runs.map(run => run.risk_score || 0).reverse(), borderColor: '#635bff', backgroundColor: 'rgba(99,91,255,.12)', fill: true, tension: .35, pointBackgroundColor: '#635bff', pointRadius: 3 }] }, options: { ...defaults, scales: { y: { min: 0, max: 1, ticks: { stepSize: .2 }, grid: { color: '#edf0f5' } }, x: { grid: { display: false }, ticks: { maxTicksLimit: 6 } } } } });
+  new Chart(document.getElementById('riskHeatmap'), { type: 'scatter', data: { datasets: [{ label: 'Run', data: runs.map(run => ({ x: run.risk_level, y: run.risk_score || 0 })), backgroundColor: runs.map(run => palette[run.risk_level] || '#635bff'), pointRadius: 8, pointHoverRadius: 10 }] }, options: { ...defaults, scales: { x: { type: 'category', labels: riskLevels, grid: { display: false } }, y: { min: 0, max: 1, ticks: { stepSize: .2 }, grid: { color: '#edf0f5' } } } } });
+  new Chart(document.getElementById('reviewChart'), { type: 'doughnut', data: { labels: ['Review required', 'Cleared'], datasets: [{ data: [reviewCount, Math.max(runs.length - reviewCount, 0)], backgroundColor: ['#ef6b73', '#31b985'], borderWidth: 0, hoverOffset: 5 }] }, options: { ...defaults, cutout: '68%' } });
 </script>
-
 {% endblock %}

@@ -19,6 +19,8 @@ def init_db():
         )
     if "created_at" not in existing_columns:
         migrations.append("ALTER TABLE ai_systems ADD COLUMN created_at DATETIME")
+    if "pii_policy" not in existing_columns:
+        migrations.append("ALTER TABLE ai_systems ADD COLUMN pii_policy VARCHAR(32) DEFAULT 'REDACT'")
 
     if migrations:
         with engine.begin() as connection:

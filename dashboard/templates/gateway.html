@@ -1,0 +1,346 @@
+{% extends "base.html" %}
+{% block content %}
+
+<style>
+  .gateway-page { --ink: #172033; --muted: #667085; --line: #e5eaf2; --brand: #635bff; --teal: #15b8a6; color: var(--ink); }
+  .gateway-hero {
+    background: radial-gradient(circle at 84% 18%, rgba(75, 217, 194, .24), transparent 28%),
+                linear-gradient(125deg, #171c42, #292477 58%, #4033a5);
+    border-radius: 22px;
+    color: #fff;
+    padding: 2.4rem;
+    box-shadow: 0 18px 42px rgba(37, 31, 112, .23);
+    margin-bottom: 1.8rem;
+  }
+  .gateway-eyebrow { color: #8ff4df; font-size: .75rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }
+  .gateway-hero .title, .gateway-hero .subtitle { color: #fff; }
+  .gateway-hero .title { line-height: 1.1; margin-bottom: .7rem !important; }
+  .gateway-hero .subtitle { line-height: 1.35; margin-top: 0 !important; opacity: .78; max-width: 38rem; }
+
+  .endpoint-pill {
+    display: inline-flex; align-items: center; gap: .55rem;
+    padding: .5rem .8rem;
+    background: rgba(255,255,255,.12);
+    border: 1px solid rgba(255,255,255,.18);
+    border-radius: 999px;
+    font: 600 .82rem ui-monospace, SFMono-Regular, Menlo, monospace;
+  }
+  .endpoint-dot {
+    width: .5rem; height: .5rem;
+    border-radius: 50%;
+    background: #65f0c6;
+    box-shadow: 0 0 0 4px rgba(101,240,198,.15);
+  }
+
+  .gateway-card {
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    box-shadow: 0 12px 30px rgba(27, 39, 94, .07);
+    overflow: hidden;
+    background: #fff;
+  }
+  .gateway-card .card-content { padding: 1.7rem; }
+
+  .section-title { font-weight: 700; font-size: 1.05rem; margin-bottom: .25rem; }
+  .section-hint { color: var(--muted); font-size: .9rem; margin-bottom: 1.45rem; }
+
+  .label { color: #344054; font-size: .82rem; letter-spacing: .02em; }
+  .textarea, .select select {
+    border-color: #d9e0ec;
+    border-radius: 10px;
+    box-shadow: none;
+  }
+  .textarea {
+    font: .85rem/1.5 ui-monospace, SFMono-Regular, Menlo, monospace;
+    background: #fbfcff;
+    min-height: 125px;
+  }
+  .textarea:focus, .select select:focus {
+    border-color: var(--brand);
+    box-shadow: 0 0 0 3px rgba(99, 91, 255, .12);
+  }
+
+  .run-button {
+    border: 0;
+    border-radius: 10px;
+    background: linear-gradient(100deg, #635bff, #7b6ef6);
+    box-shadow: 0 8px 16px rgba(99,91,255,.24);
+    font-weight: 700;
+    padding: .75rem 1.15rem;
+    transition: transform .15s, box-shadow .15s;
+  }
+  .run-button:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 11px 20px rgba(99,91,255,.3);
+  }
+
+  .status-card {
+    height: 100%;
+    border-radius: 18px;
+    border: 1px solid var(--line);
+    background: #fff;
+    padding: 1.35rem;
+  }
+  .status-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+  }
+  .live-status {
+    color: #148575;
+    background: #e8faf6;
+    border-radius: 999px;
+    padding: .3rem .65rem;
+    font-size: .75rem;
+    font-weight: 700;
+  }
+  .live-status.running {
+    animation: pulse 1.2s infinite;
+  }
+  @keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: .4; }
+    100% { opacity: 1; }
+  }
+
+  .output {
+    margin: 0;
+    min-height: 176px;
+    max-height: 320px;
+    overflow: auto;
+    padding: 1rem;
+    border-radius: 12px;
+    background: #f7f8fc;
+    color: #344054;
+    font-size: .8rem;
+    white-space: pre-wrap;
+  }
+
+  .curl-card {
+    margin-top: 1.25rem;
+    border-radius: 16px;
+    overflow: hidden;
+    background: #151a2d;
+    box-shadow: 0 10px 25px rgba(17,24,39,.18);
+  }
+  .curl-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: .75rem 1rem;
+    color: #d5dcf4;
+    font-size: .82rem;
+    border-bottom: 1px solid rgba(255,255,255,.1);
+  }
+  .curl-command {
+    color: #a7f3d0;
+    background: transparent;
+    margin: 0;
+    padding: 1.1rem;
+    white-space: pre-wrap;
+    font-size: .8rem;
+  }
+  .copy-button {
+    background: rgba(255,255,255,.1);
+    color: #fff;
+    border: 0;
+    border-radius: 7px;
+    font-size: .75rem;
+    padding: .35rem .65rem;
+    cursor: pointer;
+  }
+  .copy-button:hover { background: rgba(255,255,255,.18); }
+
+</style>
+
+<div class="gateway-page">
+
+  <!-- HERO -->
+  <section class="gateway-hero">
+    <p class="gateway-eyebrow mb-3">AI Governance Control Tower</p>
+    <h1 class="title is-2 mb-2">Governance gateway</h1>
+    <p class="subtitle is-5 mb-4">Test a model request and inspect its risk assessment in one place.</p>
+    <span class="endpoint-pill"><span class="endpoint-dot"></span> POST&nbsp; /governance/run</span>
+  </section>
+
+  {% if not systems %}
+  <article class="message is-warning">
+    <div class="message-body">No AI systems are registered. Add one before running governance.</div>
+  </article>
+  {% endif %}
+
+  <div class="columns is-variable is-5">
+
+    <!-- LEFT: FORM -->
+    <div class="column is-7">
+      <section class="gateway-card">
+        <div class="card-content">
+
+          <h2 class="section-title">Create a governed run</h2>
+          <p class="section-hint">Supply the system and request data you want the gateway to evaluate.</p>
+
+          <form id="governance-form">
+
+            <!-- SYSTEM -->
+            <div class="field">
+              <label class="label" for="system-name">AI system</label>
+              <div class="control">
+                <div class="select is-fullwidth">
+                  <select id="system-name" {% if not systems %}disabled{% endif %}>
+                    {% for system in systems %}
+                    <option value="{{ system.name }}">{{ system.name }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <!-- INPUT PAYLOAD -->
+            <div class="field">
+              <label class="label" for="input-payload">Input payload <span class="has-text-grey-light">JSON</span></label>
+              <div class="control">
+                <textarea id="input-payload" class="textarea" rows="5">{
+  "message": "Review this request for governance risks."
+}</textarea>
+              </div>
+            </div>
+
+            <!-- SAFETY FLAGS -->
+            <div class="field">
+              <label class="label" for="safety-flags">Safety flags <span class="has-text-grey-light">JSON</span></label>
+              <div class="control">
+                <textarea id="safety-flags" class="textarea" rows="3">{}</textarea>
+              </div>
+              <p class="help">Mock Model Mode replaces these flags with its mock safety result.</p>
+            </div>
+
+            <!-- RUN BUTTON -->
+            <button id="run-button" class="button is-primary run-button" type="submit" {% if not systems %}disabled{% endif %}>
+              Run governance assessment
+            </button>
+
+          </form>
+
+        </div>
+      </section>
+    </div>
+
+    <!-- RIGHT: RESPONSE -->
+    <div class="column is-5">
+      <section class="status-card">
+        <div class="status-row">
+          <div>
+            <h2 class="section-title mb-1">Response</h2>
+            <p class="is-size-7 has-text-grey">Live gateway output</p>
+          </div>
+          <span id="status-label" class="live-status">READY</span>
+        </div>
+        <pre id="result" class="output">Submit a request to see the response.</pre>
+      </section>
+    </div>
+
+  </div>
+
+  <!-- CURL PREVIEW -->
+  <section class="curl-card">
+    <div class="curl-header">
+      <span>Command line preview</span>
+      <button id="copy-curl" class="copy-button" type="button">Copy cURL</button>
+    </div>
+    <pre id="curl-command" class="curl-command"></pre>
+  </section>
+
+</div>
+
+<!-- JS -->
+<script>
+  const form = document.getElementById("governance-form"),
+        systemName = document.getElementById("system-name"),
+        inputPayload = document.getElementById("input-payload"),
+        safetyFlags = document.getElementById("safety-flags"),
+        result = document.getElementById("result"),
+        curlCommand = document.getElementById("curl-command"),
+        statusLabel = document.getElementById("status-label"),
+        runButton = document.getElementById("run-button");
+
+  function payload() {
+    return {
+      system_name: systemName.value,
+      input_payload: JSON.parse(inputPayload.value),
+      safety_flags: JSON.parse(safetyFlags.value)
+    };
+  }
+
+  function updateCurl() {
+    try {
+      const body = JSON.stringify(payload(), null, 2).replace(/'/g, "'\\\"'\\\"'");
+      curlCommand.textContent =
+        "curl -X POST http://localhost:8000/governance/run \\\n" +
+        "  -H 'Content-Type: application/json' \\\n" +
+        "  -d '" + body + "'";
+    } catch (_) {
+      curlCommand.textContent = "Enter valid JSON to generate the cURL command.";
+    }
+  }
+
+  [systemName, inputPayload, safetyFlags].forEach((element) =>
+    element.addEventListener("input", updateCurl)
+  );
+  updateCurl();
+
+  document.getElementById("copy-curl").addEventListener("click", async () => {
+    try {
+      await navigator.clipboard.writeText(curlCommand.textContent);
+      document.getElementById("copy-curl").textContent = "Copied";
+      showToast("cURL copied to clipboard");
+      setTimeout(() => document.getElementById("copy-curl").textContent = "Copy cURL", 1600);
+    } catch (_) {
+      showToast("Unable to copy cURL", "error");
+    }
+  });
+
+  form.addEventListener("submit", async (event) => {
+    event.preventDefault();
+
+    let body;
+    try {
+      body = payload();
+    } catch (error) {
+      statusLabel.textContent = "INVALID JSON";
+      result.textContent = "Invalid JSON: " + error.message;
+      showToast("Enter valid JSON before submitting", "error");
+      return;
+    }
+
+    statusLabel.textContent = "RUNNING";
+    statusLabel.classList.add("running");
+    runButton.classList.add("is-loading");
+    result.textContent = "Submitting request...";
+
+    try {
+      const response = await fetch("/governance/run", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body)
+      });
+
+      const data = await response.json();
+
+      statusLabel.textContent = response.ok ? "COMPLETE" : "ERROR";
+      statusLabel.classList.remove("running");
+      result.textContent = JSON.stringify(data, null, 2);
+      showToast(response.ok ? "Governance assessment complete" : "Governance request failed", response.ok ? "success" : "error");
+
+    } catch (error) {
+      statusLabel.textContent = "ERROR";
+      statusLabel.classList.remove("running");
+      result.textContent = "Request failed: " + error.message;
+      showToast("Governance request failed", "error");
+    } finally {
+      runButton.classList.remove("is-loading");
+    }
+  });
+</script>
+
+{% endblock %}

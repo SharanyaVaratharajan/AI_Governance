@@ -1,60 +1,8 @@
 {% extends "base.html" %}
 {% block content %}
-
-<h1 class="title">AI Systems Overview</h1>
-<p class="subtitle">Governed systems registered in the AI Governance Control Tower</p>
-
-<table class="table is-fullwidth is-hoverable">
-<thead>
-<tr>
-<th>Name</th>
-<th>Owner</th>
-<th>Risk Policy</th>
-<th>Status</th>
-<th>Last Run</th>
-<th>Details</th>
-</tr>
-</thead>
-
-<tbody>
-{% for s in systems %}
-<tr>
-<td><strong>{{ s.name }}</strong></td>
-<td>{{ s.owner }}</td>
-
-<td>
-{% if s.risk_policy == "high" %}
-<span class="tag is-danger">High</span>
-{% elif s.risk_policy == "medium" %}
-<span class="tag is-warning">Medium</span>
-{% else %}
-<span class="tag is-success">Low</span>
-{% endif %}
-</td>
-
-<td>
-{% if s.active %}
-<span class="tag is-success">Active</span>
-{% else %}
-<span class="tag is-light">Inactive</span>
-{% endif %}
-</td>
-
-<td>
-{% if s.last_run_at %}
-{{ s.last_run_at }}
-{% else %}
-<span class="tag is-light">No runs yet</span>
-{% endif %}
-</td>
-
-<td>
-<a class="button is-small is-link"
-   href="/dashboard/systems/{{ s.id }}">View</a>
-</td>
-</tr>
-{% endfor %}
-</tbody>
-</table>
-
+<div class="ct-page">
+  <header class="ct-page-hero"><div><p class="ct-eyebrow">System registry</p><h1 class="title is-3">AI systems</h1><p class="subtitle is-6">Governed systems registered in the control tower.</p></div><div class="buttons mb-0"><a class="button is-light" href="/dashboard/gateway">Run assessment</a><a class="button is-primary ct-button" href="/dashboard/systems/new">Register system</a></div></header>
+  <form class="ct-filter-bar" method="get"><div class="field"><label class="label">Search</label><div class="control"><input class="input" name="search" value="{{ filters.search }}" placeholder="System or owner"></div></div><div class="field"><label class="label">Risk policy</label><div class="control select is-fullwidth"><select name="risk_level"><option value="">All levels</option>{% for level in ["low", "medium", "high", "critical"] %}<option value="{{ level }}" {% if filters.risk_level == level %}selected{% endif %}>{{ level|title }}</option>{% endfor %}</select></div></div><div class="field"><label class="label">Status</label><div class="control select is-fullwidth"><select name="status"><option value="">All statuses</option>{% for value in ["approved", "active", "inactive"] %}<option value="{{ value }}" {% if filters.status == value %}selected{% endif %}>{{ value|title }}</option>{% endfor %}</select></div></div><div class="field"><label class="label">Created from</label><div class="control"><input class="input" type="date" name="date_from" value="{{ filters.date_from }}"></div></div><div class="field"><label class="label">Created to</label><div class="control"><input class="input" type="date" name="date_to" value="{{ filters.date_to }}"></div></div><div class="field ct-filter-action"><button class="button is-primary ct-button">Filter systems</button><a class="button is-light" href="/dashboard/systems">Reset</a></div></form>  <section class="ct-card"><div class="ct-card-header"><div><h2 class="ct-card-title">Registered systems</h2><p class="ct-card-subtitle">Ownership, policy, and operating status</p></div><span class="tag is-light ct-pill">{{ systems|length }} systems</span></div>
+  {% if systems %}<div class="table-container"><table class="table is-fullwidth ct-table"><thead><tr><th>System</th><th>Owner</th><th>Risk policy</th><th>Status</th><th>Created</th><th></th></tr></thead><tbody>{% for s in systems %}<tr><td><strong>{{ s.name }}</strong>{% if s.description %}<br><small class="has-text-grey">{{ s.description }}</small>{% endif %}</td><td>{{ s.owner }}</td><td><span class="tag ct-pill {% if s.risk_level == 'HIGH' or s.risk_level == 'CRITICAL' %}is-danger is-light{% elif s.risk_level == 'MEDIUM' %}is-warning is-light{% else %}is-success is-light{% endif %}">{{ s.risk_level }}</span></td><td><span class="tag is-success is-light ct-pill">{{ s.status }}</span></td><td>{{ s.created_at.strftime('%b %d, %Y') if s.created_at else '—' }}</td><td><a class="button is-small is-light" href="/dashboard/systems/{{ s.id }}">View</a></td></tr>{% endfor %}</tbody></table></div>{% else %}<div class="ct-empty"><strong>No AI systems registered</strong>Add a governed system to begin tracking model activity.</div>{% endif %}</section>
+</div>
 {% endblock %}

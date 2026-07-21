@@ -1,32 +1,5 @@
 {% extends "base.html" %}
 {% block content %}
-<h1 class="title">Incidents</h1>
-
-<table class="table is-striped is-fullwidth">
-<thead>
-<tr>
-<th>ID</th>
-<th>System</th>
-<th>Severity</th>
-<th>Description</th>
-<th>Created</th>
-</tr>
-</thead>
-<tbody>
-{% for i in incidents %}
-<tr>
-<td>{{ i.id }}</td>
-<td>{{ i.system_name }}</td>
-<td>{{ i.severity }}</td>
-<td>{{ i.description }}</td>
-<td>{{ i.created_at }}</td>
-<td>
-<a class="button is-small is-link" href="/incidents/{{ i.id }}">
-View
-</a>
-</td>
-</tr>
-{% endfor %}
-</tbody>
-</table>
+<div class="ct-page"><header class="ct-page-hero"><div><p class="ct-eyebrow">Governance response</p><h1 class="title is-3">Incidents</h1><p class="subtitle is-6">Open and recent items requiring governance attention.</p></div><a class="button is-primary ct-button" href="/dashboard/runs">View runs</a></header>
+<form class="ct-filter-bar" method="get"><div class="field"><label class="label">System</label><div class="control select is-fullwidth"><select name="system_id"><option value="">All systems</option>{% for system in systems %}<option value="{{ system.id }}" {% if filters.system_id == system.id %}selected{% endif %}>{{ system.name }}</option>{% endfor %}</select></div></div><div class="field"><label class="label">Status</label><div class="control select is-fullwidth"><select name="status"><option value="">All statuses</option>{% for value in ["open", "in_review", "resolved"] %}<option value="{{ value }}" {% if filters.status == value %}selected{% endif %}>{{ value|replace("_", " ")|title }}</option>{% endfor %}</select></div></div><div class="field"><label class="label">Type</label><div class="control select is-fullwidth"><select name="incident_type"><option value="">All types</option><option value="safety" {% if filters.incident_type == "safety" %}selected{% endif %}>Safety</option><option value="policy" {% if filters.incident_type == "policy" %}selected{% endif %}>Policy</option></select></div></div><div class="field"><label class="label">Created from</label><div class="control"><input class="input" type="date" name="date_from" value="{{ filters.date_from }}"></div></div><div class="field"><label class="label">Created to</label><div class="control"><input class="input" type="date" name="date_to" value="{{ filters.date_to }}"></div></div><div class="field ct-filter-action"><button class="button is-primary ct-button">Filter incidents</button><a class="button is-light" href="/dashboard/incidents">Reset</a></div></form><section class="ct-card"><div class="ct-card-header"><div><h2 class="ct-card-title">Incident queue</h2><p class="ct-card-subtitle">Newest incidents first</p></div><a class="button is-small is-light" href="/dashboard/reports/incidents.csv?status={{ filters.status }}&incident_type={{ filters.incident_type }}&system_id={{ filters.system_id or '' }}&date_from={{ filters.date_from }}&date_to={{ filters.date_to }}">Export CSV</a></div>{% if incidents %}<div class="table-container"><table class="table is-fullwidth ct-table"><thead><tr><th>ID</th><th>System</th><th>Type</th><th>Status</th><th>Created</th><th></th></tr></thead><tbody>{% for i in incidents %}<tr><td><strong>#{{ i.id }}</strong></td><td>{{ i.run.system.name if i.run and i.run.system else 'Unknown' }}</td><td><span class="tag is-danger is-light ct-pill">{{ i.type or 'SAFETY' }}</span></td><td><span class="tag is-warning is-light ct-pill">{{ i.status }}</span></td><td>{{ i.created_at.strftime('%b %d, %Y %H:%M') if i.created_at else '—' }}</td><td><a class="button is-small is-light" href="/dashboard/incidents/{{ i.id }}">Review</a></td></tr>{% endfor %}</tbody></table></div>{% else %}<div class="ct-empty"><strong>No incidents recorded</strong>Governance events that require review will appear here.</div>{% endif %}</section></div>
 {% endblock %}

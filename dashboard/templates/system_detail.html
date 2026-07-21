@@ -1,64 +1,7 @@
 {% extends "base.html" %}
 {% block content %}
-
-<h1 class="title">{{ system.name }}</h1>
-<p class="subtitle">Owned by {{ system.owner }}</p>
-
-<div class="box">
-<h2 class="title is-5">System Summary</h2>
-
-<p><strong>Risk Policy:</strong> {{ system.risk_policy }}</p>
-<p><strong>Status:</strong> {{ "Active" if system.active else "Inactive" }}</p>
-<p><strong>Last Run:</strong> {{ system.last_run_at or "No runs yet" }}</p>
-</div>
-
-<h2 class="title is-5">Recent Runs</h2>
-<table class="table is-fullwidth is-striped">
-<thead>
-<tr>
-<th>Request ID</th>
-<th>Risk Score</th>
-<th>Risk Level</th>
-<th>Review?</th>
-</tr>
-</thead>
-<tbody>
-{% for r in runs %}
-<tr>
-<td>{{ r.request_id }}</td>
-<td>{{ r.risk_score }}</td>
-<td>{{ r.risk_level }}</td>
-<td>{{ r.requires_review }}</td>
-</tr>
-{% endfor %}
-</tbody>
-</table>
-
-<h2 class="title is-5">Recent Incidents</h2>
-<table class="table is-fullwidth is-striped">
-<thead>
-<tr>
-<th>ID</th>
-<th>Severity</th>
-<th>Description</th>
-<th>Created</th>
-</tr>
-</thead>
-<tbody>
-{% for i in incidents %}
-<tr>
-<td>{{ i.id }}</td>
-<td>{{ i.severity }}</td>
-<td>{{ i.description }}</td>
-<td>{{ i.created_at }}</td>
-<td>
-<a class="button is-small is-danger" href="/incidents/{{ i.id }}">
-View
-</a>
-</td>
-</tr>
-{% endfor %}
-</tbody>
-</table>
-
+<div class="ct-page"><header class="ct-page-hero"><div><p class="ct-eyebrow">System profile</p><h1 class="title is-3">{{ system.name }}</h1><p class="subtitle is-6">Owned by {{ system.owner }}</p></div><div class="buttons mb-0"><a class="button is-light" href="/dashboard/systems">Back to systems</a><a class="button is-primary ct-button" href="/dashboard/systems/{{ system.id }}/edit">Edit system</a></div></header>
+<section class="ct-card mb-5"><div class="ct-card-header"><div><h2 class="ct-card-title">System summary</h2><p class="ct-card-subtitle">Current governance configuration</p></div><span class="tag is-success is-light ct-pill">{{ system.status }}</span></div><div class="ct-card-body"><div class="ct-detail-grid"><div class="ct-stat"><span class="ct-stat-label">Risk policy</span><span class="ct-stat-value">{{ system.risk_level }}</span></div><div class="ct-stat"><span class="ct-stat-label">Runs recorded</span><span class="ct-stat-value">{{ runs|length }}</span></div><div class="ct-stat"><span class="ct-stat-label">Incidents</span><span class="ct-stat-value">{{ incidents|length }}</span></div></div>{% if system.description %}<p class="mt-4 has-text-grey">{{ system.description }}</p>{% endif %}</div></section>
+<section class="ct-card mb-5"><div class="ct-card-header"><div><h2 class="ct-card-title">Recent runs</h2><p class="ct-card-subtitle">Latest governance evaluations for this system</p></div></div>{% if runs %}<div class="table-container"><table class="table is-fullwidth ct-table"><thead><tr><th>Request ID</th><th>Risk score</th><th>Risk level</th><th>Review</th><th>Data protection</th><th></th></tr></thead><tbody>{% for r in runs %}<tr><td><code>{{ r.request_id }}</code></td><td><strong>{{ '%.2f'|format(r.risk_score or 0) }}</strong></td><td><span class="tag is-light ct-pill">{{ r.risk_level }}</span></td><td>{{ 'Required' if r.requires_review else 'Cleared' }}</td><td>{% if r.safety_flags and r.safety_flags.get('pii_redacted') %}<span class="tag is-warning ct-pill">PII redacted</span>{% else %}<span class="has-text-grey-light">—</span>{% endif %}</td><td><a class="button is-small is-light" href="/dashboard/runs/{{ r.id }}">Details</a></td></tr>{% endfor %}</tbody></table></div>{% else %}<div class="ct-empty"><strong>No runs for this system</strong>Use the Gateway to run an assessment.</div>{% endif %}</section>
+<section class="ct-card"><div class="ct-card-header"><div><h2 class="ct-card-title">Recent incidents</h2><p class="ct-card-subtitle">Items originating from this system</p></div></div>{% if incidents %}<div class="table-container"><table class="table is-fullwidth ct-table"><thead><tr><th>ID</th><th>Type</th><th>Status</th><th>Created</th><th></th></tr></thead><tbody>{% for i in incidents %}<tr><td>#{{ i.id }}</td><td>{{ i.type }}</td><td>{{ i.status }}</td><td>{{ i.created_at }}</td><td><a class="button is-small is-light" href="/dashboard/incidents/{{ i.id }}">View</a></td></tr>{% endfor %}</tbody></table></div>{% else %}<div class="ct-empty"><strong>No incidents for this system</strong></div>{% endif %}</section></div>
 {% endblock %}

@@ -1,43 +1,44 @@
-{% extends "base.html" %}
-
+﻿{% extends "base.html" %}
 {% block content %}
-<section class="section">
-  <div class="container">
-
-    <h1 class="title">System Diagrams</h1>
-
-    <div class="box">
-      <h2 class="subtitle">Governance Flow</h2>
-      <pre>
-Mock Table Schema
-        ↓
-Column Scanner (PII + Type Rules)
-        ↓
-Tagged Columns (PII, Numeric, Free Text)
-        ↓
-Metadata Storage (table_metadata)
-        ↓
-Dashboard Rendering (/dashboard/metadata)
-      </pre>
-    </div>
-
-    <div class="box">
-      <h2 class="subtitle">AI Governance Tower Architecture</h2>
-      <pre>
-User Request
-      ↓
-Gateway API (/gateway/run)
-      ↓
-Governance Engine
-      ↓
-Risk Scoring + Safety Checks
-      ↓
-Run + Incident Logging
-      ↓
-Dashboard Visualization
-      </pre>
-    </div>
-
-  </div>
-</section>
+<style>
+  .diagram-card { min-height:100%; } .diagram-card .mermaid { display:flex; justify-content:center; padding:1.25rem 0 .25rem; overflow:auto; } .diagram-note { color:var(--ct-muted); font-size:.83rem; margin-top:.75rem; }
+</style>
+<div class="ct-page"><header class="ct-page-hero"><div><p class="ct-eyebrow">Platform reference</p><h1 class="title is-3">System diagrams</h1><p class="subtitle is-6">Governance flow, safe preflight controls, and evidence lifecycle.</p></div></header>
+<div class="columns is-variable is-4"><div class="column"><section class="ct-card diagram-card"><div class="ct-card-header"><div><h2 class="ct-card-title">Safe governance gateway</h2><p class="ct-card-subtitle">Inspect before a model call</p></div></div><div class="ct-card-body"><pre class="mermaid">flowchart TD
+  A[User input] --> B[Gateway API /governance/run]
+  B --> C[PII detection and sanitization]
+  C --> D[Phishing preflight]
+  D -->|ALLOW| E[Model call]
+  D -->|REDACT| E
+  D -->|REVIEW or BLOCK| F[Skip model call]
+  E --> G[Risk engine]
+  F --> G
+  G --> H[Sanitized run record]
+  H --> I{Review required?}
+  I -->|Yes| J[Open incident]
+  I -->|No| K[Cleared result]
+</pre><p class="diagram-note">System-level PII policy determines whether recognised PII is redacted, blocked, or allowed in approved workflows.</p></div></section></div><div class="column"><section class="ct-card diagram-card"><div class="ct-card-header"><div><h2 class="ct-card-title">Evidence and review lifecycle</h2><p class="ct-card-subtitle">From run record to governance reporting</p></div></div><div class="ct-card-body"><pre class="mermaid">flowchart TD
+  A[Sanitized model run] --> B[Safety flags]
+  A --> C[Preflight decision]
+  B --> D[Audit event]
+  C --> D
+  D --> E[Audit log]
+  A --> F[Runs dashboard]
+  F --> G[Run detail: safe preview]
+  G --> H[Incident review]
+  H --> D
+  F --> I[Filtered CSV export]
+  H --> J[Incidents dashboard]
+  J --> K[Filtered CSV export]
+</pre><p class="diagram-note">Original sensitive values are withheld; reviewers see the sanitized payload and typed redaction evidence.</p></div></section></div></div>
+<section class="ct-card mt-5"><div class="ct-card-header"><div><h2 class="ct-card-title">Idempotent metadata governance</h2><p class="ct-card-subtitle">Schema scans update existing classifications instead of duplicating records.</p></div></div><div class="ct-card-body"><pre class="mermaid">flowchart LR
+  A[Mock table schema] --> B[PII column scanner]
+  B --> C[Table and column upsert]
+  C --> D[Create new metadata]
+  C --> E[Update existing metadata]
+  C --> F[Remove legacy duplicates]
+  D --> G[Metadata dashboard]
+  E --> G
+  F --> G
+</pre></div></section></div>
 {% endblock %}
